@@ -1,0 +1,40 @@
+html,
+body,
+#root {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    background: #271d28;
+
+}
+.text {
+    color: #453b4f;
+    color: #826c58;
+    color: #271934;
+    color: #d2a75c;
+    color: #e5e1a5;
+    color: #2d2535;
+    color: #1a1223;
+    color: #d4b770;
+    color: #338a8d;
+}
+
+.test {
+
+    width: 1100px;
+    height: 550px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 1px;
+}
+
+.test > * {
+    background: #d2a75c;
+}
+
+.test > *:nth-child(odd) {
+    background: #41364f;
+}
