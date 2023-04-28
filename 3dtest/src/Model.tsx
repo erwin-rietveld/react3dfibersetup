@@ -1,90 +1,48 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import * as THREE from "three";
 import { useGLTF } from "@react-three/drei";
 import {useFrame} from "@react-three/fiber";
 import { useSpring, animated, config } from "react-spring/three";
+import { MathUtils } from 'three'
 
 const modelSettings = {
-    INTROSPEED: 0.05
+    INTROSPEED: 0.03
 };
-
-function ER3dMenu() {
-    const { nodes, materials } = useGLTF("/3dhomelos.gltf");
-    return (
-        <group>
-            <mesh
-                castShadow
-                receiveShadow
-                geometry={nodes.Cube010.geometry}
-                material={materials.Dark}
-                position={[-0.35, 0.33, -1.07]}
-                scale={[0.1, 0.04, 0.04]}
-            />
-            <mesh
-                castShadow
-                receiveShadow
-                geometry={nodes.Cube008.geometry}
-                material={materials.Dark}
-                position={[-0.02, 0.33, -1.07]}
-                scale={[0.1, 0.04, 0.04]}
-            />
-            <mesh
-                castShadow
-                receiveShadow
-                geometry={nodes.Cube009.geometry}
-                material={materials.Dark}
-                position={[0.31, 0.33, -1.07]}
-                scale={[0.1, 0.04, 0.04]}
-            />
-        </group>
-    )
-}
 
 export default function Model(props) {
     const { nodes, materials } = useGLTF("/3dhomelos.gltf");
 
+    let store = useState(true);
+
     const mobileGroupRef = useRef();
-
-    const checkRef = useRef();
-
     const buttonRef = useRef();
-    // const checkRef = useRef();
+
     const checkPos = new THREE.Vector3(-0.46, 0.43, -0.08);
+    const mobileGroupPos = new THREE.Vector3(0,0,2);
 
     useFrame((state, delta)=> {
-        const t = state.clock.getElapsedTime()
+        const t = state.clock.getElapsedTime();
 
         // main
-        mobileGroupRef.current.rotation.x = 3.3 + -Math.PI / 1.75 + Math.cos(t / 4) / 20;
+        mobileGroupRef.current.rotation.x = MathUtils.lerp(mobileGroupRef.current.rotation.x, 1.7, modelSettings.INTROSPEED)
+        mobileGroupRef.current.position.lerp(mobileGroupPos, modelSettings.INTROSPEED);
+        // mobileGroupRef.current.rotation.x = 3.3 + -Math.PI / 1.75 + Math.cos(t / 4) / 20;
         mobileGroupRef.current.rotation.y = - 0.2 + Math.sin(t / 4) / 12;
-        mobileGroupRef.current.rotation.z = -0 + (1 + Math.sin(t / 1.5)) / 10;
+        mobileGroupRef.current.rotation.z = store ? MathUtils.lerp(mobileGroupRef.current.rotation.z, -0 + (1 + Math.sin(t / 1.5)) / 10, modelSettings.INTROSPEED) : MathUtils.lerp(mobileGroupRef.current.rotation.z, -3, modelSettings.INTROSPEED);
         mobileGroupRef.current.position.y = (0 + Math.cos(t / 3.5)) / 10;
-
-        // diagram
-
-
-        // check
-        // checkRef.current.rotation.x = 3.3 + -Math.PI / 1.75 + Math.cos(t / 4) / 20;
-
-        checkRef.current.position.lerp(checkPos, modelSettings.INTROSPEED);
-        // meshRef.current.position.lerp(checkPos, modelSettings.INTROSPEED);
-        // meshRef.current.scale.lerp(1.59, modelSettings.INTROSPEED);
-        // mobileGroupRef.current.scale.lerp(1, modelSettings.INTROSPEED);
-        // state.camera.lookAt(0, 0, 0)
 
     });
 
 
     return (
-        <group {...props} dispose={null} rotation={[1.7,0.2,0.5]} position={[0,0,2]} scale={1} ref={mobileGroupRef}>
+        <group {...props} dispose={null} rotation={[-1.7,0.2,0.5]} position={[-2,0,-1]} style={{opacity: 0.2}} ref={mobileGroupRef}>
             <mesh
                 castShadow
                 receiveShadow
                 geometry={nodes.Curve.geometry}
                 material={materials.Dark}
-                position={[-0.46, 0, -0.08]}
+                position={[-0.46, 0.43, -0.08]}
                 scale={1.59}
-                ref={checkRef}
             />
             <mesh
                 castShadow
@@ -93,8 +51,35 @@ export default function Model(props) {
                 material={materials["DarkenYellow.001"]}
                 position={[0.36, 0.3, -0.09]}
                 scale={[0.36, 0.05, 0.19]}
+
             />
-            <ER3dMenu />
+            <group>
+                <mesh
+                    castShadow
+                    receiveShadow
+                    geometry={nodes.Cube010.geometry}
+                    material={materials.Dark}
+                    position={[-0.35, 0.33, -1.07]}
+                    scale={[0.1, 0.04, 0.04]}
+
+                />
+                <mesh
+                    castShadow
+                    receiveShadow
+                    geometry={nodes.Cube008.geometry}
+                    material={materials.Dark}
+                    position={[-0.02, 0.33, -1.07]}
+                    scale={[0.1, 0.04, 0.04]}
+                />
+                <mesh
+                    castShadow
+                    receiveShadow
+                    geometry={nodes.Cube009.geometry}
+                    material={materials.Dark}
+                    position={[0.31, 0.33, -1.07]}
+                    scale={[0.1, 0.04, 0.04]}
+                />
+            </group>
             <group>
                 <mesh
                     castShadow
@@ -208,6 +193,7 @@ export default function Model(props) {
                 geometry={nodes.Cube.geometry}
                 material={materials.LightYellow}
                 scale={[1, 0.07, 1.5]}
+                onClick={(e) => store =!store}
             />
             <mesh
                 castShadow
@@ -382,5 +368,7 @@ export default function Model(props) {
     );
 }
 
-useGLTF.preload("/3dhomelos.gltf");
+useGLTF.preload("/3dhomelos.gltf", function() {
+    console.log('loader');
+});
 

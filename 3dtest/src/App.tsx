@@ -1,5 +1,5 @@
 import {Suspense} from 'react'
-import {Canvas} from '@react-three/fiber'
+import {Canvas, useFrame} from '@react-three/fiber'
 
 import Model from './Model'
 
@@ -14,6 +14,8 @@ const ERlighting = () => {
 
 
 export default function App() {
+
+
     return (
         <div style={{ position: "absolute", top: 0, left: 0, width: "800px", height: "600px" }}>
             <Canvas>
