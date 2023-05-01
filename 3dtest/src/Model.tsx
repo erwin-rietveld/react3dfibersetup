@@ -1,12 +1,15 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import * as THREE from "three";
 import { useGLTF } from "@react-three/drei";
-import {useFrame} from "@react-three/fiber";
+import {useFrame,useLoader } from "@react-three/fiber";
 import { useSpring, animated, config } from "react-spring/three";
 import { MathUtils } from 'three'
+import { TextureLoader } from 'three/src/loaders/TextureLoader'
 
 const modelSettings = {
-    INTROSPEED: 0.03
+    INTROSPEED: 0.03,
+    MOVESPEED: 0.01,
+    BUTTONSPEED: 0.12,
 };
 
 export default function Model(props) {
@@ -14,11 +17,13 @@ export default function Model(props) {
 
     let store = useState(true);
 
+    const logoRef = useRef();
+    const logoRefTxt = useRef();
     const mobileGroupRef = useRef();
     const buttonRef = useRef();
-
-    const checkPos = new THREE.Vector3(-0.46, 0.43, -0.08);
     const mobileGroupPos = new THREE.Vector3(0,0,2);
+
+
 
     useFrame((state, delta)=> {
         const t = state.clock.getElapsedTime();
@@ -28,14 +33,36 @@ export default function Model(props) {
         mobileGroupRef.current.position.lerp(mobileGroupPos, modelSettings.INTROSPEED);
         // mobileGroupRef.current.rotation.x = 3.3 + -Math.PI / 1.75 + Math.cos(t / 4) / 20;
         mobileGroupRef.current.rotation.y = - 0.2 + Math.sin(t / 4) / 12;
-        mobileGroupRef.current.rotation.z = store ? MathUtils.lerp(mobileGroupRef.current.rotation.z, -0 + (1 + Math.sin(t / 1.5)) / 10, modelSettings.INTROSPEED) : MathUtils.lerp(mobileGroupRef.current.rotation.z, -3, modelSettings.INTROSPEED);
+        mobileGroupRef.current.rotation.z = store ?
+            MathUtils.lerp(mobileGroupRef.current.rotation.z, -0 + (1 + Math.sin(t / 1.5)) / 10, modelSettings.INTROSPEED) :
+            MathUtils.lerp(mobileGroupRef.current.rotation.z, -6, modelSettings.MOVESPEED);
+        // mobileGroupRef.current.rotation.z = MathUtils.lerp(mobileGroupRef.current.rotation.z, -0 + (1 + Math.sin(t / 1.5)) / 10, modelSettings.INTROSPEED);
         mobileGroupRef.current.position.y = (0 + Math.cos(t / 3.5)) / 10;
+
+        // logo
+        logoRef.current.position.y = !store ?
+            MathUtils.lerp(logoRef.current.position.y, 0.10, modelSettings.BUTTONSPEED)
+            :
+            MathUtils.lerp(logoRef.current.position.y, 0.14, modelSettings.BUTTONSPEED)
+        logoRefTxt.current.position.y = !store ?
+            MathUtils.lerp(logoRefTxt.current.position.y, 0.14, modelSettings.BUTTONSPEED)
+            :
+            MathUtils.lerp(logoRefTxt.current.position.y, 0.28, modelSettings.BUTTONSPEED)
+
+
+        logoRef.current.scale.y = !store ?
+            MathUtils.lerp(logoRef.current.scale.y, 0.03, modelSettings.BUTTONSPEED)
+            :
+            MathUtils.lerp(logoRef.current.scale.y, 0.09, modelSettings.BUTTONSPEED)
+
 
     });
 
 
+
     return (
-        <group {...props} dispose={null} rotation={[-1.7,0.2,0.5]} position={[-2,0,-1]} style={{opacity: 0.2}} ref={mobileGroupRef}>
+        <>
+        <group {...props} dispose={null} rotation={[-1.7,0.2,0.5]} position={[-2,0,-1]} ref={mobileGroupRef}>
             <mesh
                 castShadow
                 receiveShadow
@@ -187,13 +214,12 @@ export default function Model(props) {
                     />
                 </mesh>
             </group>
-            <mesh
+            <mesh name={`background`}
                 castShadow
                 receiveShadow
                 geometry={nodes.Cube.geometry}
                 material={materials.LightYellow}
                 scale={[1, 0.07, 1.5]}
-                onClick={(e) => store =!store}
             />
             <mesh
                 castShadow
@@ -340,14 +366,27 @@ export default function Model(props) {
                     scale={[0.05, 0.01, 0.01]}
                 />
             </group>
-            <mesh
-                castShadow
-                receiveShadow
-                geometry={nodes.Cylinder004.geometry}
-                material={materials.DarkenYellow}
-                position={[0, 0.14, 1.02]}
-                scale={[0.12, 0.03, 0.12]}
-            />
+            <group name={'logo'} onClick={(e) => store =!store} onPointerOver={() => document.body.style.cursor = 'pointer'}
+                   onPointerOut={() => document.body.style.cursor = 'auto'}>
+                <mesh
+                    castShadow
+                    receiveShadow
+                    geometry={nodes.Cylinder004.geometry}
+                    material={materials.DarkenYellow}
+                    position={[0, 0.14, 1.02]}
+                    scale={[0.12, 0.03, 0.12]}
+                    ref={logoRef}
+                />
+                <mesh
+                    castShadow
+                    receiveShadow
+                    geometry={nodes.Curve003.geometry}
+                    material={materials.Dark}
+                    position={[0.01, 0.18, 1.03]}
+                    scale={10.05}
+                    ref={logoRefTxt}
+                />
+            </group>
             <mesh
                 castShadow
                 receiveShadow
@@ -356,15 +395,8 @@ export default function Model(props) {
                 position={[0, 0.06, 1.02]}
                 scale={[0.17, 0.05, 0.17]}
             />
-            <mesh
-                castShadow
-                receiveShadow
-                geometry={nodes.Curve003.geometry}
-                material={materials.Dark}
-                position={[0.01, 0.18, 1.03]}
-                scale={10.05}
-            />
         </group>
+        </>
     );
 }
 

@@ -1,5 +1,6 @@
 import {Suspense} from 'react'
 import {Canvas, useFrame} from '@react-three/fiber'
+import Sprite from "./sprite";
 
 import Model from './Model'
 
